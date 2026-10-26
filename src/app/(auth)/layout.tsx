@@ -1,0 +1,29 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { AppLogoIcon } from "@/components/app-logo";
+import { APP_NAME } from "@/lib/helpdesk";
+import { getSession } from "@/lib/session";
+
+export default async function AuthLayout({ children }: LayoutProps<"/">) {
+  const session = await getSession();
+
+  if (session?.user.isActive) {
+    redirect("/dashboard");
+  }
+
+  return (
+    <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col gap-8">
+          <Link href="/" className="flex flex-col items-center gap-2 self-center font-medium">
+            <div className="mb-1 flex h-9 w-9 items-center justify-center rounded-md">
+              <AppLogoIcon className="size-9 text-foreground" />
+            </div>
+            <span className="sr-only">{APP_NAME}</span>
+          </Link>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}

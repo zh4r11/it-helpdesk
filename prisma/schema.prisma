@@ -1,0 +1,270 @@
+// Skema database IT Helpdesk.
+// Model auth (User, Session, Account, Verification, TwoFactor, Passkey)
+// mengikuti kebutuhan Better Auth; sisanya adalah data helpdesk & inventaris.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum StatusPengaduan {
+  diajukan
+  diproses
+  selesai
+}
+
+model Divisi {
+  id        Int      @id @default(autoincrement())
+  kode      String   @unique @db.VarChar(30)
+  nama      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  karyawan  Karyawan[]
+  pengaduan Pengaduan[]
+
+  @@map("divisi")
+}
+
+model Kategori {
+  id        Int      @id @default(autoincrement())
+  nama      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  komponen Komponen[]
+
+  @@map("kategori")
+}
+
+model Merk {
+  id        Int      @id @default(autoincrement())
+  nama      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  komponen Komponen[]
+
+  @@map("merk")
+}
+
+model Komponen {
+  id          Int      @id @default(autoincrement())
+  kategoriId  Int      @map("kategori_id")
+  merkId      Int      @map("merk_id")
+  tipe        String
+  spesifikasi String
+  keterangan  String?
+  aktif       Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  kategori Kategori  @relation(fields: [kategoriId], references: [id], onDelete: Restrict)
+  merk     Merk      @relation(fields: [merkId], references: [id], onDelete: Restrict)
+  rakitan  Rakitan[]
+
+  @@map("komponen")
+}
+
+model Karyawan {
+  id        Int      @id @default(autoincrement())
+  nama      String
+  jabatan   String
+  divisiId  Int?     @map("divisi_id")
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  divisi   Divisi?    @relation(fields: [divisiId], references: [id], onDelete: SetNull)
+  komputer Komputer[]
+
+  @@map("karyawan")
+}
+
+model Komputer {
+  id            Int       @id @default(autoincrement())
+  karyawanId    Int?      @map("karyawan_id")
+  namaPc        String    @map("nama_pc")
+  /// Kunci Client Access Licence, lihat CAL_OPTIONS di src/lib/helpdesk.ts
+  cal           String[]  @default([])
+  ipAddress     String?   @map("ip_address") @db.VarChar(45)
+  aksesInternet Boolean   @default(false) @map("akses_internet")
+  sistemOperasi String?   @map("sistem_operasi")
+  office        String?
+  catatan       String?
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
+
+  karyawan Karyawan? @relation(fields: [karyawanId], references: [id], onDelete: SetNull)
+  rakitan  Rakitan[]
+
+  @@map("komputer")
+}
+
+model Rakitan {
+  id         Int      @id @default(autoincrement())
+  komputerId Int      @map("komputer_id")
+  komponenId Int      @map("komponen_id")
+  barcode    String?
+  jumlah     Int      @default(1)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  komputer Komputer @relation(fields: [komputerId], references: [id], onDelete: Cascade)
+  komponen Komponen @relation(fields: [komponenId], references: [id], onDelete: Restrict)
+
+  @@map("rakitan")
+}
+
+model Pengaduan {
+  id             Int             @id @default(autoincrement())
+  nomor          String          @unique @db.VarChar(20)
+  namaPelapor    String          @map("nama_pelapor")
+  jabatan        String
+  divisiId       Int?            @map("divisi_id")
+  kendala        String
+  keterangan     String
+  status         StatusPengaduan @default(diajukan)
+  catatanPetugas String?         @map("catatan_petugas")
+  petugasId      String?         @map("petugas_id")
+  tanggalLapor   DateTime        @map("tanggal_lapor") @db.Date
+  selesaiAt      DateTime?       @map("selesai_at")
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+
+  divisi  Divisi? @relation(fields: [divisiId], references: [id], onDelete: SetNull)
+  petugas User?   @relation(fields: [petugasId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([tanggalLapor])
+  @@map("pengaduan")
+}
+
+model Avatar {
+  userId    String   @id @map("user_id")
+  data      Bytes
+  mime      String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("avatars")
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth
+// ---------------------------------------------------------------------------
+
+model User {
+  id               String   @id
+  name             String
+  username         String   @unique @db.VarChar(30)
+  displayUsername  String?  @map("display_username")
+  nip              String?  @unique @db.VarChar(30)
+  email            String   @unique
+  emailVerified    Boolean  @default(false) @map("email_verified")
+  image            String?
+  isActive         Boolean  @default(false) @map("is_active")
+  twoFactorEnabled Boolean? @default(false) @map("two_factor_enabled")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  sessions   Session[]
+  accounts   Account[]
+  twoFactors TwoFactor[]
+  passkeys   Passkey[]
+  avatar     Avatar?
+  pengaduan  Pengaduan[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime @map("expires_at")
+  token     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  userId    String   @map("user_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String    @map("account_id")
+  providerId            String    @map("provider_id")
+  userId                String    @map("user_id")
+  accessToken           String?   @map("access_token")
+  refreshToken          String?   @map("refresh_token")
+  idToken               String?   @map("id_token")
+  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
+  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([identifier])
+  @@map("verifications")
+}
+
+model TwoFactor {
+  id                      String    @id
+  secret                  String
+  backupCodes             String    @map("backup_codes")
+  userId                  String    @map("user_id")
+  verified                Boolean?  @default(true)
+  failedVerificationCount Int?      @default(0) @map("failed_verification_count")
+  lockedUntil             DateTime? @map("locked_until")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([secret])
+  @@index([userId])
+  @@map("two_factors")
+}
+
+model Passkey {
+  id           String    @id
+  name         String?
+  publicKey    String    @map("public_key")
+  userId       String    @map("user_id")
+  credentialID String    @map("credential_id")
+  counter      Int
+  deviceType   String    @map("device_type")
+  backedUp     Boolean   @map("backed_up")
+  transports   String?
+  createdAt    DateTime? @default(now()) @map("created_at")
+  aaguid       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([credentialID])
+  @@map("passkeys")
+}
