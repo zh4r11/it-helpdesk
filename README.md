@@ -72,7 +72,7 @@ Akun yang dinonaktifkan langsung keluar dari semua perangkat.
 
 ## Batasan saat ini
 
-- Belum ada pengiriman email. Tautan reset password ditulis ke log server dalam format `[reset-password] email: url`, sama seperti `MAIL_MAILER=log` di versi Laravel.
+- Belum ada pengiriman email. Tautan reset password ditulis ke log server dalam format `[reset-password] email: url`.
 - Belum ada test otomatis. Alur utama diuji manual di browser: form publik, login, 2FA, registrasi dan aktivasi, CRUD, laporan, dan tampilan ponsel.
 - Passkey sudah terpasang tetapi belum diuji di perangkat nyata.
 - Belum ada `DESIGN.md`. Warna dan font masih mengikuti versi Laravel ditambah preset shadcn, belum dari arahan desain tertulis.
@@ -124,17 +124,3 @@ berubah ketika sidebar dibuka, bukan hanya ketika layar mengecil.
 
 `src/hooks/use-form.ts` sengaja memakai arrow function untuk `setData`. React Compiler 1.0 membiarkan
 function declaration yang ber-overload bernilai `undefined` pada render pertama.
-
-## Dari versi Laravel
-
-| Laravel | Next.js |
-| --- | --- |
-| Controller dan halaman Inertia | `page.tsx` (Server Component) dan komponen client |
-| `$request->validate()` dan Form Request | Zod di `actions.ts` |
-| `Inertia::flash('toast')` | `ActionResult.message`, ditampilkan sebagai toast |
-| Fortify: login, register, 2FA, passkey | Better Auth dengan plugin username, twoFactor, dan passkey |
-| Middleware `auth` dan `active` | `requireUser()` di layout `(app)` dan di setiap action |
-| `Pengaduan::buat()` dengan `lockForUpdate` | Transaksi dengan `pg_advisory_xact_lock` |
-| `SoftDeletes` pada komputer | Kolom `deleted_at` |
-| Storage `public` untuk avatar | Tabel `avatars` dan route `/api/avatar/[id]` |
-| `config/helpdesk.php` | `src/lib/helpdesk.ts` dan `.env` |
