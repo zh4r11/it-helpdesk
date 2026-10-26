@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Boxes,
   Building2,
   ChevronsUpDown,
   Cpu,
@@ -11,6 +10,7 @@ import {
   LayoutGrid,
   LogOut,
   Monitor,
+  Send,
   Settings,
   Tag,
   Tags,
@@ -97,7 +97,7 @@ export function AppSidebar({ user, badges }: { user: UserSummary; badges: Sideba
 
   const footerItems = [
     { title: "Halaman Publik", href: "/", icon: Globe },
-    { title: "Form Pengaduan", href: "/pengaduan", icon: Boxes },
+    { title: "Form Pengaduan", href: "/pengaduan", icon: Send },
   ];
 
   return (

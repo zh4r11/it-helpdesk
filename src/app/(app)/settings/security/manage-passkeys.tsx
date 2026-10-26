@@ -82,7 +82,7 @@ export function ManagePasskeys({ passkeys }: { passkeys: Passkey[] }) {
       ) : (
         <div className="flex items-center gap-3 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
           <KeyRound className="size-4" />
-          Belum ada passkey terdaftar.
+          Belum ada passkey terdaftar. Tambahkan lewat form di bawah.
         </div>
       )}
 

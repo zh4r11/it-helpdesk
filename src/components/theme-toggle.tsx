@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-/** Tombol cepat ganti tema terang / gelap / mengikuti sistem. */
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 

@@ -20,11 +20,11 @@ export function PublicNav() {
       asChild
       variant="ghost"
       size="sm"
-      className={cn(pathname === item.href && "bg-accent text-accent-foreground")}
+      className={cn("pointer-coarse:min-w-11", pathname === item.href && "bg-accent text-accent-foreground")}
     >
-      <Link href={item.href}>
+      <Link href={item.href} aria-current={pathname === item.href ? "page" : undefined}>
         <item.icon />
-        <span className="hidden sm:inline">{item.title}</span>
+        <span className="sr-only sm:not-sr-only">{item.title}</span>
       </Link>
     </Button>
   ));

@@ -6,6 +6,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { StatusPengaduan } from "@/generated/prisma/enums";
 import { STATUS_LABEL, STATUS_PENGADUAN } from "@/lib/helpdesk";
 
+const LABEL_PENDEK: Record<StatusPengaduan, string> = {
+  diajukan: "Diajukan",
+  diproses: "Diproses",
+  selesai: "Selesai",
+};
+
 export function StatusTabs({
   status,
   counts,
@@ -19,7 +25,6 @@ export function StatusTabs({
 
   return (
     <Tabs
-      className="max-w-full overflow-x-auto"
       value={status}
       onValueChange={(value) => {
         const params = new URLSearchParams({ status: value });
@@ -31,10 +36,12 @@ export function StatusTabs({
         router.push(`/admin/pengaduan?${params}`, { scroll: false });
       }}
     >
-      <TabsList>
+      <TabsList className="w-full @3xl:w-fit">
         {STATUS_PENGADUAN.map((item) => (
           <TabsTrigger key={item} value={item} className="gap-2">
-            {STATUS_LABEL[item]}
+            {/* Label penuh butuh sekitar 460 px; di area sempit pakai label pendek. */}
+            <span className="@lg:hidden">{LABEL_PENDEK[item]}</span>
+            <span className="hidden @lg:inline">{STATUS_LABEL[item]}</span>
             <Badge variant="secondary" className="h-5 min-w-5 rounded-full px-1.5 tabular-nums">
               {counts[item] ?? 0}
             </Badge>

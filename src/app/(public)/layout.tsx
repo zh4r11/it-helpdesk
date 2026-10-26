@@ -14,7 +14,7 @@ export default async function PublicLayout({ children }: LayoutProps<"/">) {
     <div className="flex min-h-svh flex-col bg-background">
       <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 md:px-6">
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link href="/" className="flex items-center gap-2.5 rounded-lg pointer-coarse:min-h-11">
             <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <AppLogoIcon className="size-5" />
             </span>
@@ -27,16 +27,16 @@ export default async function PublicLayout({ children }: LayoutProps<"/">) {
           <nav className="flex items-center gap-1">
             <PublicNav />
             <ThemeToggle />
-            <Button asChild size="sm" variant="outline">
+            <Button asChild size="sm" variant="outline" className="pointer-coarse:min-w-11">
               {session ? (
                 <Link href="/dashboard">
                   <LayoutGrid />
-                  <span className="hidden sm:inline">Dashboard</span>
+                  <span className="sr-only sm:not-sr-only">Dashboard</span>
                 </Link>
               ) : (
                 <Link href="/login">
                   <LogIn />
-                  <span className="hidden sm:inline">Login Petugas</span>
+                  <span className="sr-only sm:not-sr-only">Login Petugas</span>
                 </Link>
               )}
             </Button>
@@ -47,11 +47,10 @@ export default async function PublicLayout({ children }: LayoutProps<"/">) {
       <main className="flex flex-1 flex-col">{children}</main>
 
       <footer className="border-t">
-        <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-2 px-4 py-6 text-sm text-muted-foreground sm:flex-row md:px-6">
+        <div className="mx-auto w-full max-w-6xl px-4 py-6 text-center text-sm text-muted-foreground sm:text-left md:px-6">
           <p>
             © {new Date().getFullYear()} {APP_NAME}. Seluruh hak cipta dilindungi.
           </p>
-          <p>Butuh bantuan cepat? Hubungi tim IT di ekstensi kantor.</p>
         </div>
       </footer>
     </div>

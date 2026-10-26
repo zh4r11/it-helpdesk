@@ -58,13 +58,13 @@ export default function SearchInput({
         value={cari}
         onChange={(event) => setCari(event.target.value)}
         placeholder={placeholder}
-        className="pr-8 pl-8"
+        className="pr-9 pl-8 pointer-coarse:pr-12"
       />
       {cari && (
         <button
           type="button"
           onClick={() => setCari("")}
-          className="absolute top-1/2 right-2 -translate-y-1/2 rounded-sm text-muted-foreground hover:text-foreground"
+          className="absolute inset-y-0 right-0 flex items-center rounded-r-lg px-2.5 text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring pointer-coarse:px-3.5"
         >
           <X className="size-4" />
           <span className="sr-only">Hapus pencarian</span>

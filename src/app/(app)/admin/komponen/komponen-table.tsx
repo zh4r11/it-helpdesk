@@ -95,7 +95,11 @@ export function KomponenTable({ komponen, kategori, merk }: { komponen: Komponen
       <DataTableCard
         rows={hasil}
         rowKey={(k) => k.id}
-        emptyText="Belum ada komponen."
+        emptyText={
+          cari || filterKategori !== "semua"
+            ? "Tidak ada komponen yang cocok dengan pencarian atau kategori yang dipilih."
+            : "Belum ada komponen. Tambahkan lewat tombol Tambah komponen."
+        }
         columns={[
           { header: "Kategori", cell: (k) => <Badge variant="secondary">{k.kategori.nama}</Badge>, className: "w-36" },
           { header: "Merk", cell: (k) => <span className="font-medium">{k.merk.nama}</span> },

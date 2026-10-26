@@ -36,9 +36,10 @@ cp .env.example .env
 
 Buat database PostgreSQL `it_helpdesk`, lalu sesuaikan `.env`:
 
-- `DATABASE_URL` — koneksi PostgreSQL
-- `BETTER_AUTH_SECRET` — string acak minimal 32 karakter (`openssl rand -base64 32`)
-- `BETTER_AUTH_URL` — URL aplikasi (dipakai juga untuk passkey)
+- `DATABASE_URL`: koneksi PostgreSQL
+- `DATABASE_POOL_MAX`: isi `1` bila memakai `prisma dev`, kosongkan untuk PostgreSQL biasa
+- `BETTER_AUTH_SECRET`: string acak minimal 32 karakter (`openssl rand -base64 32`)
+- `BETTER_AUTH_URL`: URL aplikasi (dipakai juga untuk passkey)
 
 Kemudian:
 

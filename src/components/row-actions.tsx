@@ -6,9 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { ActionResult } from "@/lib/action";
 
-/**
- * Tombol ubah & hapus pada baris tabel.
- */
 export default function RowActions({
   onEdit,
   destroy,

@@ -51,7 +51,7 @@ export function UsersTable({
       <DataTableCard
         rows={hasil}
         rowKey={(u) => u.id}
-        emptyText="Tidak ada akun."
+        emptyText={cari ? `Tidak ada akun yang cocok dengan "${cari}".` : "Belum ada akun lain selain admin."}
         emptyIcon={UserCog}
         columns={[
           {

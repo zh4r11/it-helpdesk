@@ -71,7 +71,11 @@ export function KaryawanTable({
       <DataTableCard
         rows={hasil}
         rowKey={(k) => k.id}
-        emptyText="Belum ada data karyawan."
+        emptyText={
+          cari
+            ? `Tidak ada karyawan yang cocok dengan "${cari}".`
+            : "Belum ada data karyawan. Tambahkan lewat tombol Tambah karyawan."
+        }
         emptyIcon={Users}
         columns={[
           { header: "No", cell: (_, i) => i + 1, className: "w-12 text-muted-foreground" },

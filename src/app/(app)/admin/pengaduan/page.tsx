@@ -2,6 +2,7 @@ import { Eye, Inbox, Trash2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import ConfirmDelete from "@/components/confirm-delete";
+import { EmptyState } from "@/components/empty-state";
 import PageHeader, { PageContainer } from "@/components/page-header";
 import Pagination from "@/components/pagination";
 import SearchInput from "@/components/search-input";
@@ -19,6 +20,16 @@ import { hapusPengaduan } from "./actions";
 import { StatusTabs } from "./status-tabs";
 
 export const metadata: Metadata = { title: "Data Pengaduan" };
+
+function pesanKosong(status: StatusPengaduan, cari: string): string {
+  if (cari) {
+    return `Tidak ada pengaduan ${STATUS_LABEL[status].toLowerCase()} yang cocok dengan "${cari}".`;
+  }
+
+  return status === "diajukan"
+    ? "Tidak ada pengaduan yang menunggu. Laporan baru dari form publik akan muncul di sini."
+    : `Belum ada pengaduan ${STATUS_LABEL[status].toLowerCase()}. Ubah status lewat halaman detail pengaduan.`;
+}
 
 export default async function PengaduanIndexPage({ searchParams }: PageProps<"/admin/pengaduan">) {
   const query = await searchParams;
@@ -61,11 +72,22 @@ export default async function PengaduanIndexPage({ searchParams }: PageProps<"/a
     <PageContainer breadcrumbs={[{ title: "Pengaduan" }]}>
       <PageHeader title="Data Pengaduan" description="Kelola laporan kerusakan dan permasalahan TI dari karyawan." />
 
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <StatusTabs status={status} counts={counts} cari={cari} />
-        <SearchInput key={status} value={cari} placeholder="Cari nomor, pelapor, kendala..." />
+      {/* Container query: lebar area konten berubah oleh sidebar, bukan hanya oleh layar. */}
+      <div className="@container">
+        <div className="flex flex-col gap-3 @3xl:flex-row @3xl:items-center @3xl:justify-between">
+          <StatusTabs status={status} counts={counts} cari={cari} />
+          <SearchInput
+            key={status}
+            value={cari}
+            placeholder="Cari nomor, pelapor, kendala..."
+            className="sm:w-full @3xl:w-72"
+          />
+        </div>
       </div>
 
+      {pengaduan.length === 0 ? (
+        <EmptyState icon={Inbox}>{pesanKosong(status, cari)}</EmptyState>
+      ) : (
       <Card className="py-0">
         <Table>
           <TableHeader>
@@ -78,16 +100,6 @@ export default async function PengaduanIndexPage({ searchParams }: PageProps<"/a
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pengaduan.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} className="h-40">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <Inbox className="size-8" />
-                    <span>Tidak ada pengaduan {STATUS_LABEL[status].toLowerCase()}.</span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
             {pengaduan.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="pl-4 font-mono text-xs font-medium">
@@ -132,6 +144,7 @@ export default async function PengaduanIndexPage({ searchParams }: PageProps<"/a
           </TableBody>
         </Table>
       </Card>
+      )}
 
       <Pagination meta={page.meta(pengaduan.length)} />
     </PageContainer>

@@ -2,6 +2,7 @@ import { Eye, Globe, GlobeLock, Monitor, Pencil, Plus, Trash2 } from "lucide-rea
 import type { Metadata } from "next";
 import Link from "next/link";
 import ConfirmDelete from "@/components/confirm-delete";
+import { EmptyState } from "@/components/empty-state";
 import PageHeader, { PageContainer } from "@/components/page-header";
 import Pagination from "@/components/pagination";
 import SearchInput from "@/components/search-input";
@@ -59,6 +60,13 @@ export default async function KomputerIndexPage({ searchParams }: PageProps<"/ad
 
       <SearchInput value={cari} placeholder="Cari nama PC, IP, pengguna..." />
 
+      {komputer.length === 0 ? (
+        <EmptyState icon={Monitor}>
+          {cari
+            ? `Tidak ada PC yang cocok dengan "${cari}".`
+            : "Belum ada data PC. Tambahkan PC pertama lewat tombol Tambah PC."}
+        </EmptyState>
+      ) : (
       <Card className="py-0">
         <Table>
           <TableHeader>
@@ -71,16 +79,6 @@ export default async function KomputerIndexPage({ searchParams }: PageProps<"/ad
             </TableRow>
           </TableHeader>
           <TableBody>
-            {komputer.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} className="h-40">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <Monitor className="size-8" />
-                    Belum ada data PC.
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
             {komputer.map((pc) => (
               <TableRow key={pc.id} className="align-top">
                 <TableCell className="pl-4">
@@ -152,6 +150,7 @@ export default async function KomputerIndexPage({ searchParams }: PageProps<"/ad
           </TableBody>
         </Table>
       </Card>
+      )}
 
       <Pagination meta={page.meta(komputer.length)} />
     </PageContainer>

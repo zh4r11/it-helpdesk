@@ -1,5 +1,6 @@
 import { Download, FileText } from "lucide-react";
 import type { Metadata } from "next";
+import { EmptyState } from "@/components/empty-state";
 import PageHeader, { PageContainer } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
@@ -83,6 +84,11 @@ export default async function LaporanPage({ searchParams }: PageProps<"/admin/la
             </CardAction>
           </CardHeader>
           <CardContent className="px-0">
+            {pengaduan.length === 0 ? (
+              <EmptyState icon={FileText} bare>
+                Tidak ada pengaduan pada periode ini. Coba ubah periode di filter laporan.
+              </EmptyState>
+            ) : (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -96,16 +102,6 @@ export default async function LaporanPage({ searchParams }: PageProps<"/admin/la
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pengaduan.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-32">
-                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                        <FileText className="size-8" />
-                        Tidak ada pengaduan pada periode ini.
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
                 {pengaduan.map((item) => (
                   <TableRow key={item.id} className="align-top">
                     <TableCell className="pl-6 font-mono text-xs">{item.nomor}</TableCell>
@@ -127,6 +123,7 @@ export default async function LaporanPage({ searchParams }: PageProps<"/admin/la
                 ))}
               </TableBody>
             </Table>
+            )}
           </CardContent>
         </Card>
       )}

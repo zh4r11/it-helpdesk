@@ -47,7 +47,11 @@ export function DivisiTable({ divisi }: { divisi: Divisi[] }) {
       <DataTableCard
         rows={hasil}
         rowKey={(d) => d.id}
-        emptyText="Belum ada divisi."
+        emptyText={
+          cari
+            ? `Tidak ada divisi yang cocok dengan "${cari}".`
+            : "Belum ada divisi. Tambahkan lewat tombol Tambah divisi."
+        }
         columns={[
           {
             header: "Kode",

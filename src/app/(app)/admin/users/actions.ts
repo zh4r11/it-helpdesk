@@ -22,7 +22,6 @@ async function targetAkun(id: string) {
   return { user } as const;
 }
 
-/** Aktifkan atau nonaktifkan akun. */
 export async function setAkunAktif(id: string, aktif: boolean): Promise<ActionResult> {
   const target = await targetAkun(id);
 

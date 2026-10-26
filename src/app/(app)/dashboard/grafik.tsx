@@ -51,9 +51,17 @@ export function GrafikPengaduan({ data }: { data: BarisGrafik[] }) {
         <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={28} />
         <ChartTooltip content={<ChartTooltipContent />} />
         <ChartLegend content={<ChartLegendContent />} />
-        <Bar dataKey="diajukan" stackId="a" fill="var(--color-diajukan)" {...animasi(0)} />
-        <Bar dataKey="diproses" stackId="a" fill="var(--color-diproses)" {...animasi(1)} />
-        <Bar dataKey="selesai" stackId="a" fill="var(--color-selesai)" radius={[4, 4, 0, 0]} {...animasi(2)} />
+        {/* Garis warna kartu memisahkan segmen yang bertumpuk agar batasnya tetap terlihat. */}
+        <Bar dataKey="diajukan" stackId="a" fill="var(--color-diajukan)" stroke="var(--card)" {...animasi(0)} />
+        <Bar dataKey="diproses" stackId="a" fill="var(--color-diproses)" stroke="var(--card)" {...animasi(1)} />
+        <Bar
+          dataKey="selesai"
+          stackId="a"
+          fill="var(--color-selesai)"
+          stroke="var(--card)"
+          radius={[4, 4, 0, 0]}
+          {...animasi(2)}
+        />
       </BarChart>
     </ChartContainer>
   );

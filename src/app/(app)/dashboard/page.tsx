@@ -1,14 +1,14 @@
-import { ArrowRight, CircleCheck, Clock, Cpu, Inbox, Loader, Monitor, UserCog, Users } from "lucide-react";
+import { ArrowRight, CircleCheck, Clock, Inbox, Loader } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CountUp } from "@/components/count-up";
 import { PageContainer } from "@/components/page-header";
-import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { tahunIni, toDbDate } from "@/lib/dates";
-import { formatTanggalSingkat } from "@/lib/format";
+import { hariIni, tahunIni, toDbDate } from "@/lib/dates";
+import { formatAngka, formatTanggalSingkat } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { STATUS_PENGADUAN } from "@/lib/helpdesk";
 import { prisma } from "@/lib/prisma";
 import { GrafikPengaduan, type BarisGrafik } from "./grafik";
@@ -20,7 +20,7 @@ const namaBulan = new Intl.DateTimeFormat("id-ID", { month: "short", timeZone: "
 export default async function DashboardPage() {
   const tahun = tahunIni();
 
-  const [perStatus, perTanggal, komputer, karyawan, komponen, akunPending, terbaru] = await Promise.all([
+  const [perStatus, perTanggal, komputer, karyawan, komponen, akunPending, antrean] = await Promise.all([
     prisma.pengaduan.groupBy({ by: ["status"], _count: { _all: true } }),
     prisma.pengaduan.groupBy({
       by: ["tanggalLapor", "status"],
@@ -32,11 +32,19 @@ export default async function DashboardPage() {
     prisma.komponen.count({ where: { aktif: true } }),
     prisma.user.count({ where: { isActive: false } }),
     prisma.pengaduan.findMany({
-      orderBy: { id: "desc" },
+      where: { status: "diajukan" },
+      orderBy: [{ tanggalLapor: "asc" }, { id: "asc" }],
       take: 6,
-      select: { id: true, nomor: true, namaPelapor: true, kendala: true, status: true, tanggalLapor: true },
+      select: { id: true, nomor: true, namaPelapor: true, kendala: true, tanggalLapor: true },
     }),
   ]);
+
+  const hari = toDbDate(hariIni()).getTime();
+  const lamaMenunggu = (tanggal: Date) => {
+    const selisih = Math.round((hari - tanggal.getTime()) / 86_400_000);
+
+    return selisih <= 0 ? "masuk hari ini" : `menunggu ${selisih} hari`;
+  };
 
   const stats = Object.fromEntries(STATUS_PENGADUAN.map((s) => [s, 0])) as Record<(typeof STATUS_PENGADUAN)[number], number>;
   for (const row of perStatus) {
@@ -90,33 +98,27 @@ export default async function DashboardPage() {
       <div className="grid gap-4 lg:grid-cols-7">
         <Card className="lg:col-span-4">
           <CardHeader>
-            <CardTitle>Pengaduan per bulan</CardTitle>
-            <CardDescription>Jumlah laporan tahun {tahun} berdasarkan status</CardDescription>
+            <CardTitle>Perlu ditangani</CardTitle>
+            <CardDescription>Pengaduan yang belum diproses, paling lama menunggu di atas</CardDescription>
+            {stats.diajukan > antrean.length && (
+              <CardAction>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/admin/pengaduan?status=diajukan">
+                    Semua {stats.diajukan}
+                    <ArrowRight />
+                  </Link>
+                </Button>
+              </CardAction>
+            )}
           </CardHeader>
           <CardContent>
-            <GrafikPengaduan data={grafik} />
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Pengaduan terbaru</CardTitle>
-            <CardDescription>Enam laporan terakhir yang masuk</CardDescription>
-            <CardAction>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/admin/pengaduan">
-                  Semua
-                  <ArrowRight />
-                </Link>
-              </Button>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            {terbaru.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">Belum ada pengaduan.</p>
+            {antrean.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">
+                Tidak ada pengaduan yang menunggu. Laporan baru dari form publik akan muncul di sini.
+              </p>
             ) : (
               <ul className="divide-y">
-                {terbaru.map((item) => (
+                {antrean.map((item) => (
                   <li key={item.id}>
                     <Link
                       href={`/admin/pengaduan/${item.id}`}
@@ -129,7 +131,9 @@ export default async function DashboardPage() {
                           {formatTanggalSingkat(item.tanggalLapor)}
                         </p>
                       </div>
-                      <StatusBadge status={item.status} />
+                      <span className="shrink-0 text-xs font-medium text-amber-700 dark:text-amber-300">
+                        {lamaMenunggu(item.tanggalLapor)}
+                      </span>
                     </Link>
                   </li>
                 ))}
@@ -137,20 +141,24 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+
+        <Card className="lg:col-span-3">
+          <CardHeader>
+            <CardTitle>Pengaduan per bulan</CardTitle>
+            <CardDescription>Jumlah laporan tahun {tahun} berdasarkan status</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <GrafikPengaduan data={grafik} />
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Data PC" value={komputer} icon={Monitor} href="/admin/komputer" />
-        <StatCard title="Komponen aktif" value={komponen} icon={Cpu} href="/admin/komponen" />
-        <StatCard title="Karyawan aktif" value={karyawan} icon={Users} href="/admin/karyawan" />
-        <StatCard
-          title="Akun menunggu aktivasi"
-          value={akunPending}
-          icon={UserCog}
-          tone={akunPending > 0 ? "amber" : undefined}
-          href="/admin/users"
-        />
-      </div>
+      <nav aria-label="Ringkasan inventaris dan akun" className="flex flex-wrap gap-2">
+        <Ringkasan href="/admin/komputer" label="Data PC" value={komputer} />
+        <Ringkasan href="/admin/komponen" label="Komponen aktif" value={komponen} />
+        <Ringkasan href="/admin/karyawan" label="Karyawan aktif" value={karyawan} />
+        <Ringkasan href="/admin/users" label="Akun menunggu aktivasi" value={akunPending} perhatian={akunPending > 0} />
+      </nav>
     </PageContainer>
   );
 }
@@ -200,5 +208,30 @@ function StatCard({
     </Link>
   ) : (
     content
+  );
+}
+
+function Ringkasan({
+  href,
+  label,
+  value,
+  perhatian = false,
+}: {
+  href: string;
+  label: string;
+  value: number;
+  perhatian?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors hover:bg-muted/60 pointer-coarse:min-h-11",
+        perhatian && "border-amber-300 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10",
+      )}
+    >
+      <span className="font-semibold tabular-nums">{formatAngka(value)}</span>
+      <span className="text-muted-foreground">{label}</span>
+    </Link>
   );
 }

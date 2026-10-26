@@ -58,7 +58,11 @@ export function NamaTable({
       <DataTableCard
         rows={hasil}
         rowKey={(r) => r.id}
-        emptyText={`Belum ada ${entitas}.`}
+        emptyText={
+          cari
+            ? `Tidak ada ${entitas} yang cocok dengan "${cari}".`
+            : `Belum ada ${entitas}. Tambahkan lewat tombol Tambah ${entitas}.`
+        }
         columns={[
           { header: "No", cell: (_, i) => i + 1, className: "w-12 text-muted-foreground" },
           { header: `Nama ${entitas}`, cell: (r) => <span className="font-medium">{r.nama}</span> },

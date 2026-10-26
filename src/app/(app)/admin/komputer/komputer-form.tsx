@@ -323,7 +323,7 @@ export function KomputerForm({ komputer, karyawan, komponen }: FormOptions & { k
                   ))}
                   {form.data.rakitan.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="h-20 text-center text-muted-foreground">
+                      <TableCell colSpan={4} className="h-20 text-center whitespace-normal text-muted-foreground">
                         Belum ada komponen. Klik “Tambah baris”.
                       </TableCell>
                     </TableRow>

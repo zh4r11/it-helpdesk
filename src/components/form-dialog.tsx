@@ -12,9 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 
-/**
- * Dialog berisi form tambah/ubah data.
- */
 export default function FormDialog({
   open,
   onOpenChange,

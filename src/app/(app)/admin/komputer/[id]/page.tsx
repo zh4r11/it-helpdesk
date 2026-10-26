@@ -1,8 +1,9 @@
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Cpu, Pencil, Trash2 } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import ConfirmDelete from "@/components/confirm-delete";
+import { EmptyState } from "@/components/empty-state";
 import PageHeader, { PageContainer } from "@/components/page-header";
 import { AktifBadge } from "@/components/status-badge";
 import { Badge } from "@/components/ui/badge";
@@ -118,6 +119,11 @@ export default async function KomputerShowPage({ params }: PageProps<"/admin/kom
           <CardDescription>{rakitan.length} komponen terpasang</CardDescription>
         </CardHeader>
         <CardContent className="px-0">
+          {rakitan.length === 0 ? (
+            <EmptyState icon={Cpu} bare>
+              Belum ada komponen terpasang. Tambahkan lewat tombol Ubah.
+            </EmptyState>
+          ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -131,13 +137,6 @@ export default async function KomputerShowPage({ params }: PageProps<"/admin/kom
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rakitan.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-20 text-center text-muted-foreground">
-                    Belum ada komponen terpasang.
-                  </TableCell>
-                </TableRow>
-              )}
               {rakitan.map((r) => (
                 <TableRow key={r.id}>
                   <TableCell className="pl-6">
@@ -153,6 +152,7 @@ export default async function KomputerShowPage({ params }: PageProps<"/admin/kom
               ))}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
     </PageContainer>

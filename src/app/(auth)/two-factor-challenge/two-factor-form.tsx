@@ -95,7 +95,7 @@ export function TwoFactorForm() {
             <span>atau </span>
             <button
               type="button"
-              className="cursor-pointer text-foreground underline decoration-neutral-300 underline-offset-4 hover:decoration-current dark:decoration-neutral-500"
+              className="cursor-pointer rounded-sm text-foreground underline decoration-neutral-300 underline-offset-4 outline-none hover:decoration-current focus-visible:ring-3 focus-visible:ring-ring dark:decoration-neutral-500"
               onClick={() => {
                 setPakaiKodePemulihan((v) => !v);
                 setCode("");
